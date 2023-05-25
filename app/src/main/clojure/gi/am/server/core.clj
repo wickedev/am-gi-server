@@ -1,5 +1,6 @@
 (ns gi.am.server.core
-  (:require [gi.am.server.api :refer [start-server]]
+  (:require [clojure.java.io :as io]
+            [gi.am.server.api :refer [start-server]]
             [integrant.core :as ig]))
 
 (defmethod ig/init-key :app/server [_ ctx]
@@ -13,3 +14,11 @@
 
 (defmethod ig/halt-key! :graphql/schema [_ _schema]
   nil)
+
+(defn -main [& _args]
+  (-> "config.edn"
+      io/resource
+      slurp
+      ig/read-string
+      ig/prep
+      ig/init))

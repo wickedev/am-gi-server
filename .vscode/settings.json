@@ -1,0 +1,39 @@
+{
+    "java.configuration.updateBuildConfiguration": "interactive",
+    "calva.evalOnSave": true,
+    "calva.useLiveShare": true,
+    "calva.autoOpenJackInTerminal": true,
+    "calva.referencesCodeLens.enabled": true,
+    "calva.fmt.configPath": "CLOJURE-LSP",
+    "calva.useTestExplorer": true,
+    "calva.highlight.rainbowIndentGuides": true,
+    "search.exclude": {
+        "**/output.calva-repl": true,
+        "**/.git": true,
+        ".clj-kondo/**": true,
+        "**/tmp": true,
+        "gradlew": true,
+        "gradlew.bat": true
+    },
+    "calva.customREPLCommandSnippets": [
+        {
+            "name": "go",
+            "repl": "clj",
+            "snippet": "(user/go)"
+        },
+        {
+            "name": "reset",
+            "repl": "clj",
+            "snippet": "(user/reset)"
+        },
+    ],
+    "calva.replConnectSequences": [
+        {
+            "projectType": "Gradle",
+            "afterCLJReplJackInCode": "(user/go)",
+            "name": "Gradle (user/go)",
+            "cljsType": "none"
+        }
+    ],
+    "java.compile.nullAnalysis.mode": "automatic"
+}

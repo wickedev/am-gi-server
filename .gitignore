@@ -8,7 +8,7 @@ bin
 .gradle
 .portal
 .vscode
-!.vscode/settings.json
+!(.vscode/settings.json)
 .calva
 .lsp
 .nrepl-port
