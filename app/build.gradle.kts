@@ -32,6 +32,9 @@ dependencies {
     implementation("io.projectreactor.netty:reactor-netty:1.1.7")
     implementation("io.projectreactor:reactor-core:3.5.6")
 
+    implementation("com.github.seancorfield:honeysql:2.4.1033")
+    implementation("org.mariadb:r2dbc-mariadb:1.1.4")
+
     testRuntimeOnly("dev.clojurephant:jovial:0.4.1")
     testImplementation("com.google.guava:guava:31.1-jre")
 
@@ -42,12 +45,4 @@ dependencies {
 val sourcesJar by tasks.registering(Jar::class) {
     archiveClassifier.set("sources")
     from(project.the<SourceSetContainer>()["main"].allSource)
-}
-
-tasks.withType<ClojureNRepl>() {
-    forkOptions.jvmArgs = listOf("-Djava.net.preferIPv4Stack=true")
-}
-
-tasks.withType<Test>() {
-    useJUnitPlatform()
 }

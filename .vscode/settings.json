@@ -7,6 +7,7 @@
     "calva.fmt.configPath": "CLOJURE-LSP",
     "calva.useTestExplorer": true,
     "calva.highlight.rainbowIndentGuides": true,
+    "calva.autoSelectNReplPortFromPortFile": false,
     "search.exclude": {
         "**/output.calva-repl": true,
         "**/.git": true,
@@ -29,9 +30,11 @@
     ],
     "calva.replConnectSequences": [
         {
-            "projectType": "Gradle",
-            "afterCLJReplJackInCode": "(user/go)",
-            "name": "Gradle (user/go)",
+            "name": "Custom Gradle",
+            "projectType": "generic",
+            "nReplPortFile": [
+                ".nrepl-port"
+            ],
             "cljsType": "none"
         }
     ],
