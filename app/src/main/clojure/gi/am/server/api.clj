@@ -1,5 +1,8 @@
 (ns gi.am.server.api
-  (:import [java.util.function Consumer Function]
+  (:require [gi.am.server.users.route :refer [get-users]])
+  (:import [io.netty.channel.group DefaultChannelGroup]
+           [io.netty.util.concurrent DefaultEventExecutor]
+           [java.util.function Consumer Function]
            [org.springframework.http.server.reactive ReactorHttpHandlerAdapter]
            [org.springframework.web.reactive.function.server
             HandlerFunction
@@ -7,9 +10,6 @@
             RequestPredicates
             RouterFunctions
             ServerResponse]
-           [io.netty.channel.group DefaultChannelGroup]
-           [io.netty.util.concurrent DefaultEventExecutor]
-           [reactor.netty DisposableServer]
            [reactor.core.publisher Mono]
            [reactor.netty.http.server HttpServer]))
 
@@ -35,16 +35,22 @@
                    (-> (HandlerStrategies/builder)
                        (.build))))))))
 
+(defrecord User [name])
+
 (defn r [{:keys [schema] :as _ctx}]
   (prn :schema schema)
   (routes
    (RequestPredicates/GET "/"
-     (handler (fn [_req] (-> (ServerResponse/ok)
-                             (.body (Mono/just "Hello GET!?") String)))))
+     (handler (fn [req] (let [res (get-users req)
+                              r (Mono/just {"test" "1"})]
+                          (-> (ServerResponse/ok)
+                              (.contentType org.springframework.http.MediaType/APPLICATION_JSON)
+                              (.body r java.util.Map))))))
    (RequestPredicates/POST "/graphql"
      (handler (fn [_req]
                 (-> (ServerResponse/ok)
                     (.body (Mono/just "Hello POST!!") String)))))))
+
 (defn started [server]
   (let [host (.host server)
         port (.port server)]
@@ -56,8 +62,6 @@
         channel-group (DefaultChannelGroup. event-executor)
         server (-> (http-server (r ctx))
                    (.channelGroup channel-group))
-        _ (prn :server server (.getConnectors server))
-
         server (-> server (.bindNow))]
     (started server)
     server))

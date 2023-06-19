@@ -4,14 +4,12 @@
             [integrant.core :as ig]))
 
 (defmethod ig/init-key :app/server [_ ctx]
-  (prn :starting)
-  (let [s (start-server ctx)]
-    (prn :started)
-    s))
+  (prn :initializing)
+  (start-server ctx))
 
 (defmethod ig/halt-key! :app/server [_ server]
-  (-> server (.disposeNow))
-  (prn :server (.isDisposed server)))
+  (prn :halting)
+  (-> server (.disposeNow)))
 
 (defmethod ig/init-key :graphql/schema [_ _opts]
   {})

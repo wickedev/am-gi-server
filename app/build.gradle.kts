@@ -1,5 +1,3 @@
-import dev.clojurephant.plugin.clojure.tasks.ClojureNRepl
-
 plugins {
     id("dev.clojurephant.clojure") version "0.8.0-beta.1"
     id("io.spring.dependency-management") version "1.1.0"
@@ -31,13 +29,18 @@ dependencies {
     implementation("org.springframework:spring-webflux:$spring_version")
     implementation("io.projectreactor.netty:reactor-netty:1.1.7")
     implementation("io.projectreactor:reactor-core:3.5.6")
-
     implementation("com.github.seancorfield:honeysql:2.4.1033")
     implementation("org.mariadb:r2dbc-mariadb:1.1.4")
 
     testRuntimeOnly("dev.clojurephant:jovial:0.4.1")
     testImplementation("com.google.guava:guava:31.1-jre")
 
+
+    implementation("com.github.seancorfield:next.jdbc:1.3.874")
+    implementation("org.mariadb.jdbc:mariadb-java-client:3.1.4")
+
+    devImplementation("migratus:migratus:1.5.1")
+    
     devImplementation("integrant:repl:0.3.2")
     devImplementation("org.clojure:tools.namespace:1.3.0")
 }

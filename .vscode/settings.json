@@ -25,7 +25,7 @@
         {
             "name": "reset",
             "repl": "clj",
-            "snippet": "(user/reset)"
+            "snippet": "(user/reset)" 
         },
     ],
     "calva.replConnectSequences": [
@@ -35,7 +35,8 @@
             "nReplPortFile": [
                 ".nrepl-port"
             ],
-            "cljsType": "none"
+            "cljsType": "none",
+            "afterCLJReplJackInCode": "(user/go)"
         }
     ],
     "java.compile.nullAnalysis.mode": "automatic"
