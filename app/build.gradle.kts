@@ -31,6 +31,7 @@ dependencies {
     implementation("io.projectreactor:reactor-core:3.5.6")
     implementation("com.github.seancorfield:honeysql:2.4.1033")
     implementation("org.mariadb:r2dbc-mariadb:1.1.4")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.15.2")
 
     testRuntimeOnly("dev.clojurephant:jovial:0.4.1")
     testImplementation("com.google.guava:guava:31.1-jre")
