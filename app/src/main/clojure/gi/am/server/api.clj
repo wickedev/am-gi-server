@@ -1,6 +1,7 @@
 (ns gi.am.server.api
   (:require [clojure.java.data :as j]
-            [gi.am.server.users.route :refer [get-users]])
+            [gi.am.server.users.route :refer [get-users]]
+            [jsonista.core :as json])
   (:import [io.netty.channel.group DefaultChannelGroup]
            [io.netty.util.concurrent DefaultEventExecutor]
            [java.util.function Consumer Function]
@@ -33,13 +34,22 @@
        (build)))
 
 (defn http-server [routes]
-  (let [port (System/getenv "PORT")]
+  (let [port (System/getenv "PORT")
+        handler-strategies (org.springframework.web.reactive.function.server.HandlerStrategies/withDefaults)]
+    (-> handler-strategies
+        (.messageWriters)
+        (nth 10)
+        (.getEncoder)
+        (.setObjectMapper (json/object-mapper
+                           {:encode-key-fn (comp name)
+                            :decode-key-fn (comp keyword)})))
     (-> (HttpServer/create)
         (.host "0.0.0.0")
         (.port (if port (Integer/parseInt port) 8081))
         (.handle (ReactorHttpHandlerAdapter.
                   (RouterFunctions/toHttpHandler
-                   routes))))))
+                   routes
+                   handler-strategies))))))
 
 (defrecord User [name])
 
@@ -47,11 +57,12 @@
   (prn :schema schema)
   (routes
    (RequestPredicates/GET "/"
-     (handler (fn [req]  (-> (ServerResponse/ok)
+     (handler (fn [req]  (let [users (get-users req)]
+                           (-> (ServerResponse/ok)
                              (.body
                               (BodyInserters/fromPublisher
-                               (Mono/just (User. "Ryan"))
-                               User))))))
+                               (Mono/just users)
+                               (class users))))))))
    (RequestPredicates/POST "/graphql"
      (handler (fn [_req]
                 (-> (ServerResponse/ok)
@@ -89,6 +100,11 @@
   @(def server (.bindNow server))
 
   @(def server (start-server {}))
+
+
+
+
+
 
 
   (.. server disposeNow)
