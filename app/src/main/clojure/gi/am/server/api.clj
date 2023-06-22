@@ -7,8 +7,12 @@
            [java.util.function Consumer Function]
            [java.util.function BiFunction]
            [org.springframework.core ParameterizedTypeReference]
+           [org.springframework.http.codec ServerCodecConfigurer]
+           [org.springframework.http.codec.json Jackson2JsonDecoder]
+           [org.springframework.http.codec.json Jackson2JsonEncoder]
            [org.springframework.http.server.reactive ReactorHttpHandlerAdapter]
            [org.springframework.web.reactive.function BodyInserters]
+           [org.springframework.web.reactive.function.server HandlerStrategies]
            [org.springframework.web.reactive.function.server
             HandlerFunction
             HandlerStrategies
@@ -33,9 +37,30 @@
        ~@body
        (build)))
 
+(defn server-codec-configurer []
+  (let [obejct-mapper (json/object-mapper
+                       {:encode-key-fn name
+                        :decode-key-fn keyword})
+        configurer (ServerCodecConfigurer/create)
+        encoder (Jackson2JsonEncoder.)
+        decoder (Jackson2JsonDecoder.)]
+
+    (.. encoder (setObjectMapper obejct-mapper))
+    (.. decoder (setObjectMapper obejct-mapper))
+
+    (-> configurer
+        (.defaultCodecs)
+        (.jackson2JsonEncoder encoder))
+
+    (-> configurer
+        (.defaultCodecs)
+        (.jackson2JsonDecoder decoder))
+
+    configurer))
+
 (defn http-server [routes]
   (let [port (System/getenv "PORT")
-        handler-strategies (org.springframework.web.reactive.function.server.HandlerStrategies/withDefaults)]
+        handler-strategies (HandlerStrategies/withDefaults)]
     (-> handler-strategies
         (.messageWriters)
         (nth 10)
@@ -57,12 +82,11 @@
   (prn :schema schema)
   (routes
    (RequestPredicates/GET "/"
-     (handler (fn [req]  (let [users (get-users req)]
-                           (-> (ServerResponse/ok)
+     (handler (fn [req] (-> (ServerResponse/ok)
                              (.body
                               (BodyInserters/fromPublisher
-                               (Mono/just users)
-                               (class users))))))))
+                               (get-users nil)
+                               Object))))))
    (RequestPredicates/POST "/graphql"
      (handler (fn [_req]
                 (-> (ServerResponse/ok)
@@ -92,6 +116,7 @@
 
 (comment
   @(def server (http-server (r {})))
+  (server-codec-configurer)
 
   @(def event-executor (DefaultEventExecutor.))
   @(def channel-group (DefaultChannelGroup. event-executor))

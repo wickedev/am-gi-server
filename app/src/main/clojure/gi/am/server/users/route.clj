@@ -1,5 +1,6 @@
 (ns gi.am.server.users.route
-  (:require [next.jdbc :as jdbc]))
+  (:require [next.jdbc :as jdbc]
+            [gi.am.server.users.db :as db]))
 
 (def ds (jdbc/get-datasource {:dbtype            "mariadb"
                                :dbname            "change_me"
@@ -10,7 +11,7 @@
                                :useUnicode        true
                                :characterEncoding "utf-8"}))
 
-(defn get-users [_req] (jdbc/execute! ds ["SELECT * FROM users;"]))
+(defn get-users [_req] (db/execute! db/conn-factory ["SELECT * FROM users;"]))
 
 (comment
   @(def ds (jdbc/get-datasource {:dbtype            "mariadb"
