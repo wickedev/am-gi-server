@@ -1,3 +1,5 @@
+import dev.clojurephant.plugin.clojure.tasks.ClojureNRepl
+
 plugins {
     id("dev.clojurephant.clojure") version "0.8.0-beta.1"
     id("io.spring.dependency-management") version "1.1.0"
@@ -44,6 +46,10 @@ dependencies {
     
     devImplementation("integrant:repl:0.3.2")
     devImplementation("org.clojure:tools.namespace:1.3.0")
+}
+
+tasks.withType<ClojureNRepl>() {
+    forkOptions.jvmArgs = listOf("-Djava.net.preferIPv4Stack=true")
 }
 
 val sourcesJar by tasks.registering(Jar::class) {
