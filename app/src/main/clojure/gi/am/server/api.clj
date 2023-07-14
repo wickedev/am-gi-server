@@ -7,6 +7,7 @@
            [java.util.function Consumer Function]
            [java.util.function BiFunction]
            [org.springframework.core ParameterizedTypeReference]
+           [org.springframework.http HttpStatus]
            [org.springframework.http.codec ServerCodecConfigurer]
            [org.springframework.http.codec.json Jackson2JsonDecoder]
            [org.springframework.http.codec.json Jackson2JsonEncoder]
@@ -21,6 +22,7 @@
             ServerResponse]
            [org.springframework.web.server WebExceptionHandler]
            [reactor.core.publisher Mono]
+           [reactor.core.publisher Flux]
            [reactor.netty.http.server HttpServer]))
 
 (defn ^BiFunction bi-function [f]  (reify BiFunction (apply [_ arg1 arg2] (f arg1 arg2))))
@@ -31,6 +33,12 @@
 (defn ^reactor.core.Disposable disposable [f] (reify reactor.core.Disposable (dispose [_] (f))))
 (defn ^WebExceptionHandler web-exception-handler [f] (reify WebExceptionHandler (handle [_ exchange ex] (f exchange ex))))
 
+(def obejct-mapper (json/object-mapper
+                    {:encode-key-fn name
+                     :decode-key-fn keyword}))
+
+
+
 (defmacro routes [& body]
   `(.. RouterFunctions
        route
@@ -38,10 +46,7 @@
        (build)))
 
 (defn server-codec-configurer []
-  (let [obejct-mapper (json/object-mapper
-                       {:encode-key-fn name
-                        :decode-key-fn keyword})
-        configurer (ServerCodecConfigurer/create)
+  (let [configurer (ServerCodecConfigurer/create)
         encoder (Jackson2JsonEncoder.)
         decoder (Jackson2JsonDecoder.)]
 
@@ -58,9 +63,21 @@
 
     configurer))
 
+
+
 (defn http-server [routes]
   (let [port (System/getenv "PORT")
-        handler-strategies (HandlerStrategies/withDefaults)]
+        handler-strategies (-> (HandlerStrategies/builder)
+                               (.exceptionHandler
+                                (web-exception-handler
+                                 (fn [exchange e]
+                                   (let [res (.. exchange getResponse)
+                                         error (.. e getMessage)
+                                         bs (.. obejct-mapper (writeValueAsBytes {:error error}))
+                                         buffer (.. res bufferFactory (wrap bs))]
+                                     (.setStatusCode res HttpStatus/INTERNAL_SERVER_ERROR)
+                                     (.. res (writeWith (Flux/just buffer)))))))
+                               (.build))]
     (-> handler-strategies
         (.messageWriters)
         (nth 10)
@@ -84,7 +101,7 @@
    (RequestPredicates/GET "/"
      (handler (fn [req] (-> (ServerResponse/ok)
                             (.body (BodyInserters/fromPublisher
-                                    (get-users req)
+                                    nil
                                     Object))))))
    (RequestPredicates/POST "/graphql"
      (handler (fn [_req]
@@ -93,8 +110,8 @@
    (onError Exception
             (bi-function (fn [e req]
                            (prn :e e)
-                           (-> ((ServerResponse/badRequest)
-                                (.body (BodyInserters/fromValue "error")))))))
+                           (-> (ServerResponse/badRequest)
+                               (.body (BodyInserters/fromValue "error"))))))
    (before (function (fn [req] (prn :before) req)))
    (after (bi-function (fn [req res] (prn :after) res)))))
 
