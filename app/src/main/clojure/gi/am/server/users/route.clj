@@ -22,5 +22,5 @@
                                  :port              3306
                                  :useUnicode        true
                                  :characterEncoding "utf-8"}))
-  (jdbc/execute! ds ["SELECT * FROM users;"]))
+  (get-users nil))
 

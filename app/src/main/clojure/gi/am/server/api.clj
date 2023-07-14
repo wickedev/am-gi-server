@@ -83,10 +83,9 @@
   (routes
    (RequestPredicates/GET "/"
      (handler (fn [req] (-> (ServerResponse/ok)
-                             (.body
-                              (BodyInserters/fromPublisher
-                               (get-users nil)
-                               Object))))))
+                            (.body (BodyInserters/fromPublisher
+                                    (get-users req)
+                                    Object))))))
    (RequestPredicates/POST "/graphql"
      (handler (fn [_req]
                 (-> (ServerResponse/ok)
@@ -123,14 +122,9 @@
   @(def server (.channelGroup server channel-group))
 
   @(def server (.bindNow server))
+  (type (get-users nil))
 
   @(def server (start-server {}))
-
-
-
-
-
-
 
   (.. server disposeNow)
   (.. server (disposeNow (java.time.Duration/ofSeconds 10)))

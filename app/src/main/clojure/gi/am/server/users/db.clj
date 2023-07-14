@@ -19,21 +19,21 @@
 
 (defmulti make-derefable type)
 
-(defmethod make-derefable reactor.core.publisher.MonoSingle
+(defmethod make-derefable reactor.core.publisher.Mono
   [mono]
   (proxy [reactor.core.publisher.Mono
           clojure.lang.IDeref] []
     (deref []
       (.block mono))))
 
-(defmethod make-derefable reactor.core.publisher.MonoFlatMapMany
+(defmethod make-derefable reactor.core.publisher.Flux
   [flux]
   (proxy [reactor.core.publisher.Flux
           clojure.lang.IDeref] []
     (deref []
       (.block (.collectList flux)))))
 
-(defn execute!* [conn-factory prepared-statement]
+(defn execute! [conn-factory prepared-statement]
   (let [conn (.. conn-factory create)
         sql (first prepared-statement)]
     (-> conn
@@ -58,15 +58,11 @@
                                           [key value])))
                                  (into {}))))))))))))))))
 
-(defn execute! [conn-factory prepared-statement]
-  (make-derefable (execute!* conn-factory prepared-statement)))
-
 (defn execute-one! [conn-factory prepared-statement]
-  (-> (execute!* conn-factory prepared-statement)
+  (-> (execute! conn-factory prepared-statement)
       (.take 1)
-      (.singleOrEmpty)
-      make-derefable))
+      (.singleOrEmpty)))
 
 (comment
-  @(execute-one! conn-factory ["SELECT * FROM users;"])
-  @(execute! conn-factory ["SELECT * FROM users;"]))
+  @(make-derefable (execute-one! conn-factory ["SELECT * FROM users;"]))
+  @(make-derefable (execute! conn-factory ["SELECT * FROM users;"])))
