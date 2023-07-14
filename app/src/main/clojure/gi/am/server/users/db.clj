@@ -17,7 +17,23 @@
 
 (def conn-factory (MariadbConnectionFactory. config))
 
-(defn execute! [conn-factory prepared-statement]
+(defmulti make-derefable type)
+
+(defmethod make-derefable reactor.core.publisher.MonoSingle
+  [mono]
+  (proxy [reactor.core.publisher.Mono
+          clojure.lang.IDeref] []
+    (deref []
+      (.block mono))))
+
+(defmethod make-derefable reactor.core.publisher.MonoFlatMapMany
+  [flux]
+  (proxy [reactor.core.publisher.Flux
+          clojure.lang.IDeref] []
+    (deref []
+      (.block (.collectList flux)))))
+
+(defn execute!* [conn-factory prepared-statement]
   (let [conn (.. conn-factory create)
         sql (first prepared-statement)]
     (-> conn
@@ -42,12 +58,15 @@
                                           [key value])))
                                  (into {}))))))))))))))))
 
+(defn execute! [conn-factory prepared-statement]
+  (make-derefable (execute!* conn-factory prepared-statement)))
 
 (defn execute-one! [conn-factory prepared-statement]
-  (-> (execute! conn-factory prepared-statement)
-      (.singleOrEmpty)))
+  (-> (execute!* conn-factory prepared-statement)
+      (.take 1)
+      (.singleOrEmpty)
+      make-derefable))
 
 (comment
-  (deref)
-  (.block (.collectList (execute! conn-factory ["SELECT * FROM users;"])))
-  (.block (execute-one! conn-factory ["SELECT * FROM users;"])))
+  @(execute-one! conn-factory ["SELECT * FROM users;"])
+  @(execute! conn-factory ["SELECT * FROM users;"]))
