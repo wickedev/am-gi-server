@@ -63,20 +63,18 @@
 
     configurer))
 
-
+(defn message-exception-handler [exchange e]
+  (let [res (.. exchange getResponse)
+        error (.. e getMessage)
+        bs (.. obejct-mapper (writeValueAsBytes {:error error}))
+        buffer (.. res bufferFactory (wrap bs))]
+    (.setStatusCode res HttpStatus/INTERNAL_SERVER_ERROR)
+    (.. res (writeWith (Flux/just buffer)))))
 
 (defn http-server [routes]
   (let [port (System/getenv "PORT")
         handler-strategies (-> (HandlerStrategies/builder)
-                               (.exceptionHandler
-                                (web-exception-handler
-                                 (fn [exchange e]
-                                   (let [res (.. exchange getResponse)
-                                         error (.. e getMessage)
-                                         bs (.. obejct-mapper (writeValueAsBytes {:error error}))
-                                         buffer (.. res bufferFactory (wrap bs))]
-                                     (.setStatusCode res HttpStatus/INTERNAL_SERVER_ERROR)
-                                     (.. res (writeWith (Flux/just buffer)))))))
+                               (.exceptionHandler (web-exception-handler message-exception-handler))
                                (.build))]
     (-> handler-strategies
         (.messageWriters)
@@ -101,7 +99,7 @@
    (RequestPredicates/GET "/"
      (handler (fn [req] (-> (ServerResponse/ok)
                             (.body (BodyInserters/fromPublisher
-                                    nil
+                                    (get-users req)
                                     Object))))))
    (RequestPredicates/POST "/graphql"
      (handler (fn [_req]
