@@ -37,8 +37,6 @@
                     {:encode-key-fn name
                      :decode-key-fn keyword}))
 
-
-
 (defmacro routes [& body]
   `(.. RouterFunctions
        route
@@ -105,18 +103,19 @@
      (handler (fn [_req]
                 (-> (ServerResponse/ok)
                     (.body (Mono/just "Hello POST!!") String)))))
-   (onError Exception
-            (bi-function (fn [e req]
-                           (prn :e e)
-                           (-> (ServerResponse/badRequest)
-                               (.body (BodyInserters/fromValue "error"))))))
+   (onError
+    Exception
+    (bi-function
+     (fn [e req]
+       (-> (ServerResponse/badRequest)
+           (.body (BodyInserters/fromValue "error"))))))
    (before (function (fn [req] (prn :before) req)))
    (after (bi-function (fn [req res] (prn :after) res)))))
 
 (defn started [server]
   (let [host (.host server)
         port (.port server)]
-    (prn (format "\n👉 App server available at http://%s:%d" host port))))
+    (prn (format "👉 App server available at http://%s:%d" host port))))
 
 (defn start-server
   [ctx]
