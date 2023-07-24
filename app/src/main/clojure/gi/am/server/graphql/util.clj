@@ -17,3 +17,13 @@
      :option          option
      :args            args
      :body            body}))
+
+(def ^:private qualified-field-regex #":(\w+)/(\w+)")
+
+(defn parse-qualified-field
+  [^clojure.lang.Keyword qualified-field]
+  (let [[_ object-type field] (re-matches
+                               qualified-field-regex
+                               (str qualified-field))]
+    {:object-type object-type
+     :field       field}))

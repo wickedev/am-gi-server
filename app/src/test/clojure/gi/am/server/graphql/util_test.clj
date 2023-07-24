@@ -51,5 +51,24 @@
         `[ctx batch-args]    (:args result)
         `("Greeting")        (:body result)))))
 
+(deftest parse-qualified-field-test
+  (testing "parse-qualified-field should parse keyword"
+    (let [result (util/parse-qualified-field :Query/greeting)
+          expect {:object-type "Query"
+                  :field       "greeting"}]
+      (is (= expect result))))
+  
+  (testing "parse-qualified-field should parse string"
+    (let [result (util/parse-qualified-field ":Query/greeting")
+          expect {:object-type "Query"
+                  :field       "greeting"}]
+      (is (= expect result))))
+  
+  (testing "parse-qualified-field cannot parse nil"
+    (let [result (util/parse-qualified-field nil)
+          expect {:object-type nil
+                  :field       nil}]
+      (is (= expect result)))))
+
 (comment
   (run-tests))
