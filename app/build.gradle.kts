@@ -46,13 +46,22 @@ dependencies {
     
     devImplementation("integrant:repl:0.3.2")
     devImplementation("org.clojure:tools.namespace:1.3.0")
+    devImplementation("jonase:eastwood:1.4.0")
+}
+
+val sourcesJar by tasks.registering(Jar::class) {
+    archiveClassifier.set("sources")
+    from(project.the<SourceSetContainer>()["main"].allSource)
 }
 
 tasks.withType<ClojureNRepl>() {
     forkOptions.jvmArgs = listOf("-Djava.net.preferIPv4Stack=true")
 }
 
-val sourcesJar by tasks.registering(Jar::class) {
-    archiveClassifier.set("sources")
-    from(project.the<SourceSetContainer>()["main"].allSource)
+task<Exec>("cljKondoLint") {
+    commandLine("clj-kondo", "--lint", ".")
+}
+
+task<Exec>("cljKondoFix") {
+    commandLine("clj-kondo", "--lint", ".")
 }

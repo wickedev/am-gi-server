@@ -27,3 +27,9 @@
                                (str qualified-field))]
     {:object-type object-type
      :field       field}))
+
+(defn transform-keys
+  "Recursively transforms all keys"
+  [t coll]
+  (letfn [(transform [[k v]] [(t k) v])]
+    (walk/postwalk (fn [x] (if (map? x) (with-meta (into {} (map transform x)) (meta x)) x)) coll)))
