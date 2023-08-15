@@ -1,4 +1,4 @@
-(ns gi.am.server.graphql.core
+(ns gi.am.server.graphql.schema
   (:require [gi.am.server.graphql.util :as util]
             [clojure.java.data :as jd]
             [clojure.walk :as walk])

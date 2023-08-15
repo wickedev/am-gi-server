@@ -1,4 +1,5 @@
-(ns gi.am.server.graphql.util)
+(ns gi.am.server.graphql.util 
+  (:require [clojure.walk :as walk]))
 
 (defn parse-fdecl
   [fdecl]

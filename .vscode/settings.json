@@ -1,5 +1,4 @@
 {
-    "java.configuration.updateBuildConfiguration": "interactive",
     "calva.evalOnSave": true,
     "calva.useLiveShare": true,
     "calva.autoOpenJackInTerminal": true,
@@ -25,7 +24,7 @@
         {
             "name": "reset",
             "repl": "clj",
-            "snippet": "(user/reset)" 
+            "snippet": "(user/reset)"
         },
     ],
     "calva.replConnectSequences": [
@@ -39,5 +38,4 @@
             "afterCLJReplJackInCode": "(user/go)"
         }
     ],
-    "java.compile.nullAnalysis.mode": "automatic"
 }

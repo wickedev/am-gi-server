@@ -12,3 +12,4 @@ bin
 .calva
 .lsp
 .nrepl-port
+.clj-kondo/config.edn
